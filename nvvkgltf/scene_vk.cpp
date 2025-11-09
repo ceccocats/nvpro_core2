@@ -128,18 +128,22 @@ void nvvkgltf::SceneVk::update(VkCommandBuffer cmd, nvvk::StagingUploader& stagi
   updateRenderPrimitivesBuffer(cmd, staging, scn);
 }
 
+size_t gTextureInfoOffset = 0;
 template <typename T>
 inline shaderio::GltfTextureInfo getTextureInfo(const T& tinfo)
 {
   const KHR_texture_transform& transform = tinygltf::utils::getTextureTransform(tinfo);
   const int                    texCoord  = std::min(tinfo.texCoord, 1);  // Only 2 texture coordinates
-
+  int newIndex = tinfo.index;
+  if(tinfo.index >= 0) {
+    newIndex = tinfo.index + gTextureInfoOffset;
+  }
   // This is the texture info that will be used in the shader
   return {
       .uvTransform = shaderio::float3x2(transform.uvTransform[0][0], transform.uvTransform[1][0],   //
                                         transform.uvTransform[0][1], transform.uvTransform[1][1],   //
                                         transform.uvTransform[0][2], transform.uvTransform[1][2]),  //
-      .index       = tinfo.index,
+      .index       = newIndex,
       .texCoord    = texCoord,
   };
 }
