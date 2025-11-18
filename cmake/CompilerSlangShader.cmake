@@ -105,6 +105,10 @@ function(compile_slang SHADER_FILES OUTPUT_DIR SHADER_HEADERS_VAR)
         DEPFILE "${OUTPUT_FILE}.dep"
         COMMENT "Compiling Slang shader ${SHADER_NAME}"
       )
+      add_custom_target(
+        "shader_${VN_SHADER_NAME}" ALL
+        DEPENDS ${OUTPUT_FILE}.h ${OUTPUT_FILE}.spv
+      )
       list(APPEND SHADER_HEADERS "${OUTPUT_FILE}.h")
   endforeach()
 
