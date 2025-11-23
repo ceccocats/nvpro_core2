@@ -141,6 +141,7 @@ void nvapp::Application::init(ApplicationCreateInfo& info)
   m_physicalDevice     = info.physicalDevice;
   m_queues             = info.queues;
   m_vsyncWanted        = info.vSync;
+  m_targetFramerate    = info.targetFramerate;
   m_useMenubar         = info.useMenu;
   m_dockSetup          = info.dockSetup;
   m_headless           = info.headless;
@@ -372,7 +373,7 @@ void nvapp::Application::run()
     // We add a delay before polling to reduce latency.
     if(m_vsyncWanted)
     {
-      m_framePacer.pace();
+      m_framePacer.pace(m_targetFramerate == 0 ? getMonitorsMinRefreshRate() : m_targetFramerate);
     }
     glfwPollEvents();
 

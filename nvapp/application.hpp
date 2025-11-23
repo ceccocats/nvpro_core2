@@ -150,6 +150,7 @@ struct ApplicationCreateInfo
   // GLFW
   glm::uvec2 windowSize{0, 0};  // Window size (width, height) or Viewport size (headless)
   bool       vSync{true};       // Enable V-Sync by default
+  int        targetFramerate {0}; // Target framerate for frame pacing (if vSync is disabled)
 
   // UI
   bool                         useMenu{true};                 // Include a menubar
@@ -263,6 +264,7 @@ private:
 
   bool        m_useMenubar{true};   // Will use a menubar
   bool        m_vsyncWanted{true};  // Wanting swapchain with vsync
+  int         m_targetFramerate{0}; // Target framerate for frame pacing (if vSync is disabled)
   std::string m_iniFilename;        // Holds an .ini name as UTF-8 since ImGui uses this encoding
 
   // Vulkan resources
