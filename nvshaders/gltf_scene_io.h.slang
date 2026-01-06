@@ -258,7 +258,7 @@ struct GltfScene
   GltfRenderPrimitive* renderPrimitives;
   GltfLight*           lights;
   int                  numLights;  // number of punctual lights
-  int                  sceneType = 0; // 0: gltf, 1: terrain, 2: grass
+  int                  sceneType = 0; // 0: gltf, 1: terrain, 2: grass, 3: volume
 };
 
 
