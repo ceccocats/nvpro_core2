@@ -47,11 +47,11 @@ void nvapp::ElementCamera::updateCamera(std::shared_ptr<nvutils::CameraManipulat
     float keyMotionFactor = ImGui::GetIO().DeltaTime;
     if(inputs.shift)
     {
-      keyMotionFactor *= 5.0F;  // Speed up the camera movement
+      keyMotionFactor *= 25.0F;  // Speed up the camera movement
     }
     if(inputs.ctrl)
     {
-      keyMotionFactor *= 0.1F;  // Slow down the camera movement
+      keyMotionFactor *= 0.5F;  // Slow down the camera movement
     }
 
     if(ImGui::IsKeyDown(ImGuiKey_W))
