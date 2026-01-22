@@ -89,7 +89,7 @@ public:
   {
     glm::vec3 eye  = glm::vec3(10, 10, 10);
     glm::vec3 ctr  = glm::vec3(0, 0, 0);
-    glm::vec3 up   = glm::vec3(0, 1, 0);
+    glm::vec3 up   = glm::vec3(0, 0, 1);
     float     fov  = 60.0f;
     glm::vec2 clip = {0.001f, 100000.0f};
 

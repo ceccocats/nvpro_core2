@@ -19,6 +19,7 @@
 
 
 #include <cinttypes>
+#include <iostream>
 #include <mutex>
 #include <sstream>
 #include <span>
@@ -26,6 +27,7 @@
 
 #include <glm/glm.hpp>
 
+#include "glm/fwd.hpp"
 #include "nvshaders/gltf_scene_io.h.slang"  // Shared between host and device
 
 #include "stb_image.h"
@@ -134,8 +136,9 @@ inline shaderio::GltfTextureInfo getTextureInfo(const T& tinfo)
 {
   const KHR_texture_transform& transform = tinygltf::utils::getTextureTransform(tinfo);
   const int                    texCoord  = std::min(tinfo.texCoord, 1);  // Only 2 texture coordinates
-  int newIndex = tinfo.index;
-  if(tinfo.index >= 0) {
+  int                          newIndex  = tinfo.index;
+  if(tinfo.index >= 0)
+  {
     newIndex = tinfo.index + gTextureInfoOffset;
   }
   // This is the texture info that will be used in the shader
@@ -529,7 +532,25 @@ bool updateAttributeBuffer(VkCommandBuffer            cmd,            // Command
   {
     const tinygltf::Accessor& accessor = model.accessors[findResult->second];
     std::vector<T>            tempStorage;
-    const std::span<const T>  data = tinygltf::utils::getAccessorData(model, accessor, &tempStorage);
+    const std::span<const T>  data     = tinygltf::utils::getAccessorData(model, accessor, &tempStorage);
+    T*                        data_ptr = const_cast<T*>(data.data());
+
+    // // Create transformation matrix (Y-up to Z-up)
+    // glm::mat4 coordinateTransform = glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+    //                                 * glm::rotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+
+    if constexpr(std::is_same_v<T, glm::vec3>)
+    {
+        for(int i = 0; i < data.size(); i++)
+        {
+          glm::vec3 in = data_ptr[i];
+          data_ptr[i].x =  in.z;   // forward
+          data_ptr[i].y =  in.x;   // left
+          data_ptr[i].z =  in.y;   // up
+        }
+    }
+
     if(data.empty())
     {
       return false;  // The data was invalid

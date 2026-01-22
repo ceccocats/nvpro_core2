@@ -17,8 +17,12 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+#include <cstdio>
+#include <cstdlib>
 #include <execution>
 #include <filesystem>
+#include <glm/gtc/type_ptr.hpp>
+#include <iostream>
 #include <unordered_set>
 
 #include <glm/gtx/norm.hpp>
@@ -30,6 +34,12 @@
 #include <nvutils/timers.hpp>
 
 #include "scene.hpp"
+#include "glm/ext.hpp"
+#include "glm/ext/quaternion_float.hpp"
+#include "glm/fwd.hpp"
+#include "glm/matrix.hpp"
+#include "glm/trigonometric.hpp"
+#include "nvvkgltf/tinygltf_utils.hpp"
 
 // List of supported extensions
 static const std::set<std::string> supportedExtensions = {
@@ -235,6 +245,48 @@ void nvvkgltf::Scene::parseScene()
     createRootIfMultipleNodes(scene);
   }
   m_sceneRootNode = m_model.scenes[m_currentScene].nodes[0];  // Set the root node of the scene
+
+  // {
+  //   // Create transformation matrix (Y-up to Z-up)
+  //   glm::mat4 coordinateTransform = glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+  //                                   * glm::rotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+  //   auto&     node = m_model.nodes[m_sceneRootNode];
+  //   glm::mat4 tf   = tinygltf::utils::getNodeMatrix(node);
+  //   tf             = coordinateTransform * tf;
+
+  //   node.matrix.resize(16);
+  //   for(int i = 0; i < 16; i++)
+  //   {
+  //     node.matrix[i] = glm::value_ptr(tf)[i];
+  //   }
+
+  //   node.translation.clear();
+  //   node.rotation.clear();
+  //   node.scale.clear();
+  // }
+
+  //  Create transformation matrix (Y-up to Z-up)
+  glm::mat4 coordinateTransform = glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+                                  * glm::rotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+  for(auto& node : m_model.nodes) {
+    glm::mat4 tf   = tinygltf::utils::getNodeMatrix(node);
+    // std::cout<<glm::to_string(tf)<<std::endl;
+    // glm::vec4 t = coordinateTransform * tf[3];
+    // tf[3] = t;
+    tf = coordinateTransform * tf  * glm::inverse(coordinateTransform);
+
+    node.matrix.resize(16);
+    for(int i = 0; i < 16; i++)
+    {
+      node.matrix[i] = glm::value_ptr(tf)[i];
+    }
+    node.translation.clear();
+    node.rotation.clear();
+    node.scale.clear();
+  }
+
 
   // There must be at least one material in the scene
   if(m_model.materials.empty())
