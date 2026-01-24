@@ -530,6 +530,21 @@ bool updateAttributeBuffer(VkCommandBuffer            cmd,            // Command
     const tinygltf::Accessor& accessor = model.accessors[findResult->second];
     std::vector<T>            tempStorage;
     const std::span<const T>  data = tinygltf::utils::getAccessorData(model, accessor, &tempStorage);
+
+    {
+      T* data_ptr = const_cast<T*>(data.data());
+      if constexpr(std::is_same_v<T, glm::vec3>)
+      {
+        for(int i = 0; i < data.size(); i++)
+        {
+          glm::vec3 in  = data_ptr[i];
+          data_ptr[i].x = in.z;  // forward
+          data_ptr[i].y = in.x;  // left
+          data_ptr[i].z = in.y;  // up
+        }
+      }
+    }
+
     if(data.empty())
     {
       return false;  // The data was invalid

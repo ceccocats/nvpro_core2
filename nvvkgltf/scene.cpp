@@ -236,6 +236,28 @@ void nvvkgltf::Scene::parseScene()
   }
   m_sceneRootNode = m_model.scenes[m_currentScene].nodes[0];  // Set the root node of the scene
 
+  // Fix coordinates
+  {
+    //  Create transformation matrix (Y-up to Z-up)
+    glm::mat4 coordinateTransform = glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f))
+                                    * glm::rotate(glm::radians(90.0f), glm::vec3(0.0f, 1.0f, 0.0f));
+
+    for(auto& node : m_model.nodes)
+    {
+      glm::mat4 tf = tinygltf::utils::getNodeMatrix(node);
+      tf = coordinateTransform * tf * glm::inverse(coordinateTransform);
+
+      node.matrix.resize(16);
+      for(int i = 0; i < 16; i++)
+      {
+        node.matrix[i] = glm::value_ptr(tf)[i];
+      }
+      node.translation.clear();
+      node.rotation.clear();
+      node.scale.clear();
+    }
+  }
+
   // There must be at least one material in the scene
   if(m_model.materials.empty())
   {
