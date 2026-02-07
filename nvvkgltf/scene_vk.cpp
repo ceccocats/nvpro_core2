@@ -134,8 +134,9 @@ inline shaderio::GltfTextureInfo getTextureInfo(const T& tinfo)
 {
   const KHR_texture_transform& transform = tinygltf::utils::getTextureTransform(tinfo);
   const int                    texCoord  = std::min(tinfo.texCoord, 1);  // Only 2 texture coordinates
-  int newIndex = tinfo.index;
-  if(tinfo.index >= 0) {
+  int                          newIndex  = tinfo.index;
+  if(tinfo.index >= 0)
+  {
     newIndex = tinfo.index + gTextureInfoOffset;
   }
   // This is the texture info that will be used in the shader
@@ -531,6 +532,8 @@ bool updateAttributeBuffer(VkCommandBuffer            cmd,            // Command
     std::vector<T>            tempStorage;
     const std::span<const T>  data = tinygltf::utils::getAccessorData(model, accessor, &tempStorage);
 
+    // CHECK IF BEAMNG
+    if(model.asset.generator != "BeamNG")
     {
       T* data_ptr = const_cast<T*>(data.data());
       if constexpr(std::is_same_v<T, glm::vec3>)

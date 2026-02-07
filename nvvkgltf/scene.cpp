@@ -236,7 +236,8 @@ void nvvkgltf::Scene::parseScene()
   }
   m_sceneRootNode = m_model.scenes[m_currentScene].nodes[0];  // Set the root node of the scene
 
-  // Fix coordinates
+  // Fix coordinates if not BEAMNG
+  if(m_model.asset.generator != "BeamNG")
   {
     //  Create transformation matrix (Y-up to Z-up)
     glm::mat4 coordinateTransform = glm::rotate(glm::radians(90.0f), glm::vec3(1.0f, 0.0f, 0.0f))
@@ -245,7 +246,7 @@ void nvvkgltf::Scene::parseScene()
     for(auto& node : m_model.nodes)
     {
       glm::mat4 tf = tinygltf::utils::getNodeMatrix(node);
-      tf = coordinateTransform * tf * glm::inverse(coordinateTransform);
+      tf           = coordinateTransform * tf * glm::inverse(coordinateTransform);
 
       node.matrix.resize(16);
       for(int i = 0; i < 16; i++)
