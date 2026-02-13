@@ -532,6 +532,46 @@ bool updateAttributeBuffer(VkCommandBuffer            cmd,            // Command
     std::vector<T>            tempStorage;
     const std::span<const T>  data = tinygltf::utils::getAccessorData(model, accessor, &tempStorage);
 
+    // std::cout << "\nATTR: " << attributeName << " ACCESSOR: " << accessor.type << " " << accessor.componentType << "\n";
+    if constexpr(std::is_same_v<T, glm::vec2>)
+    {
+      if(accessor.type == 3)
+      {
+        if(attributeName == "TEXCOORD_0" || attributeName == "TEXCOORD_1")
+        {
+          std::cout << "UV VECTOR WRONG is VEC3, should be VEC2\n";
+          std::vector<glm::vec3>           tempStorage2;
+          const std::span<const glm::vec3> data2 = tinygltf::utils::getAccessorData(model, accessor, &tempStorage2);
+          // convert vec3 to vec2
+          std::vector<glm::vec2> converted(data2.size());
+          for(size_t i = 0; i < data2.size(); i++)
+          {
+            converted[i] = glm::vec2(data2[i]);
+          }
+          if(converted.empty())
+          {
+            return false;  // The data was invalid
+          }
+          if(attributeBuffer.buffer == VK_NULL_HANDLE)
+          {
+            // We add VK_BUFFER_USAGE_2_VERTEX_BUFFER_BIT so it can be bound to
+            // a vertex input binding:
+            VkBufferUsageFlags2 bufferUsageFlag = s_bufferUsageFlag | VK_BUFFER_USAGE_2_VERTEX_BUFFER_BIT;
+            NVVK_CHECK(alloc->createBuffer(attributeBuffer, std::span(converted).size_bytes(), bufferUsageFlag));
+            NVVK_CHECK(staging->appendBuffer(attributeBuffer, 0, std::span(converted)));
+            return true;
+          }
+          else
+          {
+            staging->appendBuffer(attributeBuffer, 0, std::span(converted));
+          }
+
+          return true;
+        }
+      }
+    }
+
+
     // CHECK IF BEAMNG
     if(model.asset.generator != "BeamNG")
     {
